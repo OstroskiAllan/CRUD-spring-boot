@@ -1,5 +1,6 @@
 package borth.crud.demo.entity;
 
+
 import jakarta.persistence.*;
 
 
