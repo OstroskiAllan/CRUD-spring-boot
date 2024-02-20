@@ -3,9 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRUD - Trabalho</title>
+    <title>CRUD de Usuários</title>
 </head>
 <body>
-    <h1>Teste</h1>
+    <h1>CRUD de Usuários</h1>
+
+    <!-- Formulário para adicionar ou editar um usuário -->
+    <form id="formulario">
+        <input type="hidden" id="id">
+        <input type="text" id="nome" placeholder="Nome do Usuário" required>
+        <button type="submit">Salvar</button>
+    </form>
+    <h2>Lista de Usuários</h2>
+    <!-- Lista de usuários -->
+
+    <div id="listaUsuario"></div>
+
+    <script src="script.js"></script>
 </body>
 </html>
