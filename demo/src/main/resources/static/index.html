@@ -1,24 +1,143 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CRUD de Usuários</title>
 </head>
+
 <body>
     <h1>CRUD de Usuários</h1>
 
-    <!-- Formulário para adicionar ou editar um usuário -->
-    <form id="formulario">
-        <input type="hidden" id="id">
-        <input type="text" id="nome" placeholder="Nome do Usuário" required>
+
+    <!-- Formulário para criar novo usuário -->
+    <form id="userForm" onsubmit="event.preventDefault(); createUser(event)">
+        <label for="nome">Nome:</label>
+        <input type="text" id="nome" name="nome" required>
         <button type="submit">Salvar</button>
     </form>
-    <h2>Lista de Usuários</h2>
+
+    <br><br>
+    <!-- Botão para buscar todos os usuários -->
+    <button onclick="getAllUsers()">Buscar Todos os Usuários</button>
+    <br><br>
     <!-- Lista de usuários -->
+    <h2>Lista de Usuários:</h2>
+    <ul id="userList"></ul>
 
-    <div id="listaUsuario"></div>
+    <script>
+        // Função para criar novo usuário
+        function createUser(event) {
+            event.preventDefault();
+            const userData = {
+                name: document.getElementById('nome').value
+            };
+            fetch('/usuario/save', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(userData),
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erro ao criar usuário');
+                    }
+                    console.log('Novo usuário criado com sucesso');
+                })
+                .catch(error => console.error('Erro ao criar usuário:', error));
+        }
 
-    <script src="script.js"></script>
+        // Função para buscar todos os usuários
+        function getAllUsers() {
+            fetch('/usuario/all')
+                .then(response => response.json())
+                .then(users => {
+                    // Limpa a lista de usuários
+                    document.getElementById('userList').innerHTML = '';
+
+                    // Para cada usuário, cria um item de lista e adiciona à lista de usuários
+                    users.forEach(user => {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = `ID: ${user.id}, Nome: ${user.nome}`;
+
+                        // Botão de editar
+                        const editButton = document.createElement('button');
+                        editButton.textContent = 'Editar';
+                        editButton.addEventListener('click', () => editUser(user.id));
+
+                        // Botão de excluir
+                        const deleteButton = document.createElement('button');
+                        deleteButton.textContent = 'Excluir';
+                        deleteButton.addEventListener('click', () => deleteUser(user.id));
+
+                        // Adiciona os botões ao item da lista
+                        listItem.appendChild(editButton);
+                        listItem.appendChild(deleteButton);
+
+                        // Adiciona o item da lista à lista de usuários
+                        document.getElementById('userList').appendChild(listItem);
+                    });
+                })
+                .catch(error => console.error('Erro ao buscar usuários:', error));
+        }
+
+        // Função para editar usuário
+        function editUser(id) {
+            // Recuperar os dados do usuário com base no ID
+            fetch(`/usuario/${id}`)
+                .then(response => response.json())
+                .then(user => {
+                    // Preencher o formulário de edição com os dados do usuário
+                    document.getElementById('nome').value = user.nome;
+                })
+                .catch(error => console.error('Erro ao recuperar dados do usuário:', error));
+        }
+
+        // Função para atualizar usuário
+        function updateUser(event) {
+            event.preventDefault();
+            const id = document.getElementById('id').value;
+            const nome = document.getElementById('nome').value;
+            const userData = {
+                nome: nome
+            };
+            fetch(`/usuario/update/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(userData),
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erro ao atualizar usuário');
+                    }
+                    console.log('Usuário atualizado com sucesso');
+                    getAllUsers(); // Atualiza a lista após atualizar um usuário
+                })
+                .catch(error => console.error('Erro ao atualizar usuário:', error));
+        }
+
+        // Função para excluir usuário
+        function deleteUser(userId) {
+            // Exibir uma mensagem de confirmação
+            if (confirm('Tem certeza que deseja excluir este usuário?')) {
+                fetch(`/usuario/${userId}`, {
+                    method: 'DELETE',
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Erro ao excluir usuário');
+                        }
+                        console.log('Usuário excluído com sucesso');
+                        getAllUsers(); // Atualiza a lista após excluir um usuário
+                    })
+                    .catch(error => console.error('Erro ao excluir usuário:', error));
+            }
+        }
+    </script>
 </body>
+
 </html>
